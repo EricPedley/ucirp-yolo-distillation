@@ -2,3 +2,5 @@ frames
 videos
 .vscode
 yolo_output
+runs
+yolov8n.pt
