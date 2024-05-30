@@ -48,12 +48,17 @@ for frame_fname in tqdm(os.listdir("frames")):
     scores, labels, boxes = results['scores'].tolist(), results['labels'].tolist(), results['boxes'].tolist()
     if len(scores) == 0 and np.random.rand() < 0.9:
         continue
+    # get box with max score
     chosen_split = np.random.choice(split_names, p=split_proportions)
-    image.save(f"{out_path}/{chosen_split}/images/{frame_stem}.jpg")
     with open(f"{out_path}/{chosen_split}/labels/{frame_stem}.txt", "w") as f:
-        for score, label, (xmin, ymin, xmax, ymax) in zip(scores, labels, boxes):
+        if len(scores)>0:
+            max_score_idx = np.argmax(scores)
+            xmin, ymin, xmax, ymax = boxes[max_score_idx]
             x_float = (xmin + xmax) / 2 / width
             y_float = (ymin + ymax) / 2 / height
             width_float = (xmax - xmin) / width
             height_float = (ymax - ymin) / height
             f.write(f"0 {x_float} {y_float} {width_float} {height_float}\n")
+        else:
+            f.write("\n")
+    image.save(f"{out_path}/{chosen_split}/images/{frame_stem}.jpg")
