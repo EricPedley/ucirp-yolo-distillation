@@ -31,7 +31,7 @@ model = GroundingDinoForObjectDetection.from_pretrained("IDEA-Research/grounding
 prompt_text = "rocket." # needs to be lowercase and end with a period
 
 for frame_fname in tqdm(os.listdir("frames")):
-    frame_stem = frame_fname.split(".")[0]
+    frame_stem = frame_fname.split(".png")[0]
     image = Image.open(f"frames/{frame_fname}")
     inputs = processor(images=image, text=prompt_text, return_tensors="pt")
     for k,v in inputs.items():
@@ -48,9 +48,9 @@ for frame_fname in tqdm(os.listdir("frames")):
     scores, labels, boxes = results['scores'].tolist(), results['labels'].tolist(), results['boxes'].tolist()
     if len(scores) == 0 and np.random.rand() < 0.9:
         continue
-    spit_name = np.random.choice(split_names, p=split_proportions)
-    image.save(f"{out_path}/{split_name}/images/{frame_stem}.jpg")
-    with open(f"{out_path}/{split_name}/labels/{frame_stem}.txt", "w") as f:
+    chosen_split = np.random.choice(split_names, p=split_proportions)
+    image.save(f"{out_path}/{chosen_split}/images/{frame_stem}.jpg")
+    with open(f"{out_path}/{chosen_split}/labels/{frame_stem}.txt", "w") as f:
         for score, label, (xmin, ymin, xmax, ymax) in zip(scores, labels, boxes):
             x_float = (xmin + xmax) / 2 / width
             y_float = (ymin + ymax) / 2 / height
