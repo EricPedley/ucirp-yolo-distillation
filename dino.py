@@ -30,26 +30,38 @@ processor = GroundingDinoProcessor.from_pretrained("IDEA-Research/grounding-dino
 model = GroundingDinoForObjectDetection.from_pretrained("IDEA-Research/grounding-dino-base").to('cuda')
 prompt_text = "rocket." # needs to be lowercase and end with a period
 
-for frame_fname in tqdm(os.listdir("frames")):
-    frame_stem = frame_fname.split(".png")[0]
-    image = Image.open(f"frames/{frame_fname}")
-    inputs = processor(images=image, text=prompt_text, return_tensors="pt")
-    for k,v in inputs.items():
-        if type(v) == torch.Tensor:
-            inputs[k] = v.to('cuda')
-    with torch.no_grad():
-        outputs = model(**inputs)
-    width, height = image.size
-    postprocessed_outputs = processor.image_processor.post_process_object_detection(outputs,
-                                                                target_sizes=[(height, width)],
-                                                                threshold=0.3)
-    results = postprocessed_outputs[0] 
+i = 0
+
+frame_files: list[str] = []
+for folder in ["google_images", "google_images_2","google_images_3"]:
+    for frame_fname in os.listdir(folder):
+        frame_files.append(f"{folder}/{frame_fname}")
+
+for frame_fname in tqdm(frame_files):
+    try:
+        image = Image.open(frame_fname)
+        inputs = processor(images=image, text=prompt_text, return_tensors="pt")
+        for k,v in inputs.items():
+            if type(v) == torch.Tensor:
+                inputs[k] = v.to('cuda')
+        with torch.no_grad():
+            outputs = model(**inputs)
+        width, height = image.size
+        postprocessed_outputs = processor.image_processor.post_process_object_detection(outputs,
+                                                                    target_sizes=[(height, width)],
+                                                                    threshold=0.3)
+        results = postprocessed_outputs[0] 
+    except:
+        print(f"Error for {frame_fname}")
+        continue
 
     scores, labels, boxes = results['scores'].tolist(), results['labels'].tolist(), results['boxes'].tolist()
     if len(scores) == 0 and np.random.rand() < 0.9:
         continue
     # get box with max score
     chosen_split = np.random.choice(split_names, p=split_proportions)
+    frame_stem = frame_fname.split(".png")[0] if frame_fname.endswith('.png') else frame_fname.split(".jpg")[0]
+    frame_stem = frame_stem.replace("/", "_")
     with open(f"{out_path}/{chosen_split}/labels/{frame_stem}.txt", "w") as f:
         if len(scores)>0:
             max_score_idx = np.argmax(scores)
