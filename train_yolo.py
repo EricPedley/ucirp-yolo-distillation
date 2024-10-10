@@ -1,7 +1,7 @@
 from ultralytics import YOLO
 
 task='detection'
-model = YOLO('yolov8n.yaml')
+model = YOLO('yolov8s.pt')
     
 model.train(
     data='yolo_output/metadata.yaml', 

@@ -2,7 +2,7 @@ from ultralytics import YOLO
 import supervision as sv
 import cv2 as cv
 
-model = YOLO('runs/detect/train2/weights/best.pt')
+model = YOLO('runs/detect/train5/weights/80.pt')
 
 img = cv.imread("rocket.png")
 

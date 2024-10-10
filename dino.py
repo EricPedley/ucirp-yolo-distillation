@@ -28,12 +28,12 @@ yaml.dump(metadata, open(f"{out_path}/metadata.yaml", "w"))
 
 processor = GroundingDinoProcessor.from_pretrained("IDEA-Research/grounding-dino-base")
 model = GroundingDinoForObjectDetection.from_pretrained("IDEA-Research/grounding-dino-base").to('cuda')
-prompt_text = "rocket." # needs to be lowercase and end with a period
+prompt_text = "rocket.missile." # needs to be lowercase and end with a period
 
 i = 0
 
 frame_files: list[str] = []
-for folder in ["google_images", "google_images_2","google_images_3"]:
+for folder in ["google_images_6"]:
     for frame_fname in os.listdir(folder):
         frame_files.append(f"{folder}/{frame_fname}")
 
